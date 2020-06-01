@@ -1,4 +1,5 @@
-// Model Photo
+// Photo Model
+
 module.exports = (bookshelf) => {
   return bookshelf.model(
     "Photo",
@@ -7,7 +8,7 @@ module.exports = (bookshelf) => {
       album() {
         return this.belongsTo("Album");
       },
-      users() {
+      user() {
         return this.belongsTo("User");
       },
     },

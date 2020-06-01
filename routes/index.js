@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const auth = require("../controllers/middlewares/auth");
 
-// GET INDEX
+//GET - Welcome
 router.get("/", (req, res) => {
-  res.send({
-    status:
-      "Welcome to my Photo API, you can search by albums and photos EX: albums/1 or photos/3",
-  });
+  res.send({ status: "Welcome to my Photo API" });
 });
-router.use("/photos", require("./photos"));
-router.use("/albums", require("./albums"));
+
+router.use("/photos", [auth.basic], require("./photos"));
+router.use("/albums", [auth.basic], require("./albums"));
+router.use("/register", require("./users"));
 
 module.exports = router;
