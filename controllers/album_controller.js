@@ -13,7 +13,7 @@ const getAlbums = async (req, res) => {
     return;
   }
 
-  // Query db for photos this user has.
+  // Query db for albums this user has.
   const userId = req.user.get("id");
   const user = await new User({ id: userId }).fetch({ withRelated: "albums" });
   const albums = user.related("albums");
