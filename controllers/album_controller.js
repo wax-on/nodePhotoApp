@@ -105,7 +105,7 @@ const postPhotoInAlbum = async (req, res) => {
   } catch (error) {
     res.status(404).send({
       status: "error",
-      message: "You dont own this album!",
+      message: "This album dosen't exist.",
     });
     throw error;
   }
