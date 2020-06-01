@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../controllers/middlewares/auth");
+const auth = require("../controllers/middlewears/auth");
 
 //GET - Welcome
 router.get("/", (req, res) => {
