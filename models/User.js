@@ -1,4 +1,4 @@
-// User model
+// MODEL USER
 const bcrypt = require("bcrypt");
 
 module.exports = (bookshelf) => {
@@ -7,10 +7,10 @@ module.exports = (bookshelf) => {
     {
       tableName: "users",
       albums() {
-        return this.belongsToMany("Album");
+        return this.hasMany("Album");
       },
       photos() {
-        return this.belongsToMany("Photo");
+        return this.hasMany("Photos");
       },
     },
     {
@@ -20,9 +20,9 @@ module.exports = (bookshelf) => {
         return new this({ id }).fetch(fetchOptions);
       },
 
-      async login(username, password) {
+      async login(email, password) {
         // Look if user exists in DB.
-        const user = await new this({ username }).fetch({ require: false });
+        const user = await new this({ email }).fetch({ require: false });
         if (!user) {
           return false;
         }

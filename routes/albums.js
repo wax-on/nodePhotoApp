@@ -3,13 +3,13 @@ const router = express.Router();
 const albumController = require("../controllers/album_controller");
 const postAlbumValidationRules = require("../validation_rules/album");
 
-// Get albums all for user
+// Get albums
 router.get("/", albumController.getAlbums);
 
-// Get a specific album for user
+// Get a specific album
 router.get("/:albumId", albumController.getSpecAlbum);
 
-// Post albums for user
+// Post albums
 router.post(
   "/",
   postAlbumValidationRules.createAlbumRules,
@@ -23,10 +23,10 @@ router.post(
   albumController.postPhotoInAlbum
 );
 
-// Update a specific album for user
+// Update a specific album
 router.put("/:albumId", albumController.update);
 
-// Destroy a specific album for user
+// Destroy a specific album
 router.delete("/:albumId", albumController.destroy);
 
 module.exports = router;

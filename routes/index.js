@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../controllers/middlewears/auth");
 
-//GET - Welcome
+//GET
 router.get("/", (req, res) => {
-  res.send({ status: "Welcome to my Photo API" });
+  res.send({ status: "Much welcome to my Node Photo App!" });
 });
 
 router.use("/photos", [auth.basic], require("./photos"));

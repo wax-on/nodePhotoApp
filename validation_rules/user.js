@@ -1,17 +1,16 @@
-// User rules
-
+// USER VALIDATION RULES
 const { body } = require("express-validator");
 const models = require("../models");
 
 const createRules = [
-  body("username")
+  body("email")
     .isLength({ min: 3 })
     .custom(async (value) => {
-      const user = await new models.User({ username: value }).fetch({
+      const user = await new models.User({ email: value }).fetch({
         require: false,
       });
       if (user) {
-        return Promise.reject("Username already exists.");
+        return Promise.reject("Email already exists.");
       }
 
       return Promise.resolve();

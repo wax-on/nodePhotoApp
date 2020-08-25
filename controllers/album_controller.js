@@ -1,21 +1,19 @@
-// Album controller
+// Album Controller
 
-const { User, Album } = require("../models");
-const models = require("../models");
+const { User, Album, Photo } = require("../models");
 const { matchedData, validationResult } = require("express-validator");
 
+//GET albums
 const getAlbums = async (req, res) => {
-  if (!req.user) {
-    res.status(401).send({
-      status: "fail",
-      data: "Authentication Required.",
-    });
+  let user = null;
+  try {
+    user = await User.fetchById(req.user.data.id, { withRelated: ["albums"] });
+  } catch (error) {
+    res.sendStatus(404);
     return;
   }
 
-  // Query db for albums this user has.
-  const userId = req.user.get("id");
-  const user = await new User({ id: userId }).fetch({ withRelated: "albums" });
+  // get this user's albums
   const albums = user.related("albums");
 
   res.send({
@@ -28,22 +26,42 @@ const getAlbums = async (req, res) => {
 
 // GET /:albumId - Get a specific resource.
 const getSpecAlbum = async (req, res) => {
-  const album = await new Album({ id: req.params.albumId }).fetch({
-    withRelated: ["photo"],
-  });
+  let album = null;
+  try {
+    album = await Album.fetchById(req.params.albumId, {
+      withRelated: "photos",
+    });
+  } catch {
+    res.status(404).send({
+      status: "fail",
+      message: "This user dosn't own this Album.🤪",
+    });
+    return;
+  }
 
-  if (req.user.id === album.attributes.user_id) {
-    res.send({
+  const userId = album.get("user_id");
+  if (userId !== req.user.data.id) {
+    res.status(401).send({
+      status: "fail",
+      message: "Method Not Allowed.🤬",
+    });
+    return;
+  }
+
+  try {
+    res.status(200).send({
       status: "success",
-      album: {
+      data: {
         album,
       },
     });
-  } else {
-    res.status(404).send({
-      status: "Fail",
-      data: "You dont own this album.",
+    return;
+  } catch (error) {
+    res.status(500).send({
+      status: "error",
+      message: "Exception thrown in database.😞",
     });
+    throw error;
   }
 };
 
@@ -51,7 +69,6 @@ const getSpecAlbum = async (req, res) => {
 const postAlbums = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log("Post photo request failed validation:", errors.array());
     res.status(422).send({
       status: "fail",
       data: errors.array(),
@@ -61,23 +78,19 @@ const postAlbums = async (req, res) => {
   const validData = matchedData(req);
 
   try {
-    const album = await new Album(validData).save();
-    const userId = req.user.get("id");
-    const user = await new User({ id: userId }).fetch({
-      withRelated: "albums",
+    const album = await new Album(validData).save({
+      user_id: req.user.attributes.id,
     });
-    const result = await user.albums().attach(album);
-    console.log("Created new album successfully:", album);
     res.send({
       status: "success",
       data: {
-        result,
+        album,
       },
     });
   } catch (error) {
     res.status(500).send({
       status: "error",
-      message: "Exception thrown in database when creating a new photo.",
+      message: "Exception thrown in database.😞",
     });
     throw error;
   }
@@ -85,33 +98,47 @@ const postAlbums = async (req, res) => {
 
 // POST /albums/:albumid/photo - Post photo to album
 const postPhotoInAlbum = async (req, res) => {
+  try {
+    album = await Album.fetchById(req.params.albumId, {
+      withRelated: "photos",
+    });
+  } catch {
+    res.status(401).send({
+      status: "fail",
+      message: "Method Not AlLowed.",
+    });
+    return;
+  }
   const error = validationResult(req);
   if (!error.isEmpty()) {
     res.status(422).send({
-      status: "Fail",
+      status: "fail",
       data: error.array(),
     });
     return;
   }
   try {
-    const photo = await models.Photo.fetchById(req.body.photo_id);
-    const album = await models.Album.fetchById(req.params.albumId);
-    const photoAlbum = await album.photo().attach([photo]);
-
-    res.status(201).send({
-      status: "success",
-      data: photoAlbum,
-    });
+    const photo = await Photo.fetchById(req.body.photo_id);
+    const album = await Album.fetchById(req.params.albumId);
+    if (photo.attributes.user_id === album.attributes.user_id) {
+      const photoAlbum = await album.photos().attach([photo]);
+      res.status(201).send({
+        status: "success",
+        data: photoAlbum,
+      });
+    } else {
+      res.status(404).send({
+        status: "fail",
+        data: "This user dosn't own this album. 🤬",
+      });
+    }
   } catch (error) {
-    res.status(404).send({
-      status: "error",
-      message: "This album dosen't exist.",
-    });
+    res.sendStatus(404);
     throw error;
   }
 };
 
-// Put /:albumId - Update a specific resource.
+// POST /:albumId - Update a specific resource.
 const update = (req, res) => {
   res.status(405).send({
     status: "fail",

@@ -3,7 +3,7 @@ const router = express.Router();
 const userController = require("../controllers/user_controller");
 const userValidationRules = require("../validation_rules/user");
 
-// Get all users
+// Get all users.
 router.get("/", userController.index);
 
 // Get a specific user

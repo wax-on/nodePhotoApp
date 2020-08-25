@@ -1,29 +1,35 @@
-// User controller
+// USER CONTROLLER
 const bcrypt = require("bcrypt");
 const { matchedData, validationResult } = require("express-validator");
 const models = require("../models");
 
 // GET / - Get all resources
 const index = async (req, res) => {
-  const allUsers = await models.User.fetchAll();
+  if (!req.user) {
+    res.status(401).send({
+      status: "fail",
+      data: "Method Not Allowed!!!! 😡",
+    });
+    return;
+  }
   res.send({
     status: "success",
     data: {
-      users: allUsers,
+      user: {
+        email: req.user.attributes.email,
+        first_name: req.user.attributes.first_name,
+        last_name: req.user.attributes.last_name,
+        id: req.user.attributes.id,
+      },
     },
   });
 };
 
 // GET /:userId - Get a specific resource
 const show = async (req, res) => {
-  const user = await new models.User({ id: req.params.userId }).fetch({
-    withRelated: ["photos"],
-  });
-  res.send({
-    status: "success",
-    data: {
-      user,
-    },
+  res.status(405).send({
+    status: "fail",
+    message: "Method Not Allowed. 😡😡😡",
   });
 };
 
@@ -32,7 +38,6 @@ const store = async (req, res) => {
   // Finds the validation errors in this request and wraps them in an object with handy functions
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log("Create user request failed validation:", errors.array());
     res.status(422).send({
       status: "fail",
       data: errors.array(),
@@ -56,7 +61,6 @@ const store = async (req, res) => {
   }
   try {
     const user = await new models.User(validData).save();
-    console.log("Created new user successfully:", user);
     res.send({
       status: "success",
       data: {

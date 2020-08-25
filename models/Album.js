@@ -5,11 +5,11 @@ module.exports = (bookshelf) => {
     "Album",
     {
       tableName: "albums",
-      user() {
-        return this.belongsTo("User");
+      photos() {
+        return this.belongsToMany("Photos");
       },
-      photo() {
-        return this.belongsToMany("Photo");
+      users() {
+        return this.belongsTo("User");
       },
     },
     {

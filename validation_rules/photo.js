@@ -1,5 +1,4 @@
-// Photo rules
-
+// PHOTO VALIDATION RULES
 const { body } = require("express-validator");
 const models = require("../models");
 

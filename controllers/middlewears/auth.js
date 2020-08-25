@@ -1,7 +1,5 @@
-// Auth middleware
-
+// AUTH MIDDLEWARE
 const { User } = require("../../models");
-
 const basic = async (req, res, next) => {
   // Check if Auth header exists, otherwise fail.
   if (!req.headers.authorization) {
@@ -22,7 +20,7 @@ const basic = async (req, res, next) => {
 
   const decodedPayload = Buffer.from(base64Payload, "base64").toString("ascii");
 
-  // username:password
+  // email:password
   const [username, password] = decodedPayload.split(":");
 
   const user = await User.login(username, password);
@@ -38,6 +36,7 @@ const basic = async (req, res, next) => {
    * We have now made the auth and knows that the user is the correct one. Attach the user object to the req, so other parts of the api can use the user.
    */
   req.user = user;
+  req.user.data = { id: user.get("id") };
 
   next();
 };
